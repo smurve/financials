@@ -1,0 +1,9 @@
+tensorflow==2.0-alpha
+quandl
+pandas
+numpy
+seaborn
+jupyterlab
+matplotlib
+statsmodels
+pandas_datareader
