@@ -14,3 +14,5 @@ My Notes on AZEK's excellent CFDS Course.
 
 ```$ echo have fun```
 
+### Apple described in a Fama/French 3-Factor Model
+![Apple and Nasdaq](./Apple_Nasdaq_SMB_HML.png)
