@@ -5,11 +5,12 @@ class MomentumInvestor(Investor):
     """
     A momentum investor who has some reasoning wrt true value
     """
-    def __init__(self, name, wealth, w_reason = 0.5, w_momentum = 0.5, trend_span=20):
+    def __init__(self, name, wealth, portfolio, w_reason = 0.5, w_momentum = 0.5, trend_span=20):
         self.w_reason = w_reason
         self.w_momentum = w_momentum
         self.trend_span = trend_span
-        super().__init__(name, wealth)
+        self.history = []
+        super().__init__(name, wealth, portfolio)
         
     def act(self, market):
             bid, ask = market.price_for('AAPL')
@@ -17,10 +18,12 @@ class MomentumInvestor(Investor):
             h = h[-self.trend_span:]
             bid_price, ask_price = market.price_for('AAPL')
             if len(h) > 0:
-                momentum = h[-1] - h[0]
+                # comparing opening prices
+                momentum = h[-1][0] - h[0][0]
                 value_diff = market.value_for('AAPL') - bid_price
                 incentive = value_diff * self.w_reason + momentum * self.w_momentum
-                incentive = np.random.normal(incentive, 2.0)
+                incentive = np.random.normal(incentive, 1.3)
+                self.history.append([value_diff, momentum, incentive])
                 #print("Value difference: %s" % value_diff )
                 #print("momentum:         %s" % momentum)
                 #print("Incentive: %s" % incentive)
@@ -35,8 +38,8 @@ class MomentumInvestor(Investor):
 
                 
 class ValueInvestor(Investor):
-    def __init__(self, name, wealth):
-        super().__init__(name, wealth)
+    def __init__(self, name, wealth, portfolio):
+        super().__init__(name, wealth, portfolio)
 
     def act(self, market):
         active = False
@@ -45,8 +48,8 @@ class ValueInvestor(Investor):
         
             
 class SignalInvestor(Investor):
-    def __init__(self, name, wealth):
-        super().__init__(name, wealth)
+    def __init__(self, name, wealth, portfolio):
+        super().__init__(name, wealth, portfolio)
         
     def act(self, market):
         bid, ask = market.price_for('AAPL')

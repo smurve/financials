@@ -76,35 +76,61 @@ class OrderDefered(OrderStatus):
 
     
 class Market:
-    def __init__(self, stocks=None):
+    def __init__(self, bid_ask, stocks=None):
         self.t = 0
+        self.is_open = False
         self.orders = {
             'ask': {},
             'bid': {}
         }
         self.prices = {}
         
-        self.spread = .1
-        self.history={}
+        self.spread = bid_ask
+        self.history = {}
+        self.daily = {}
         
         self.stocks = {}
+
         if stocks:
             for stock in stocks:
                 self.stocks[stock.name] = stock
                 self.orders['ask'][stock.name] = {} 
                 self.orders['bid'][stock.name] = {} 
-                self.prices[stock.name] = round(stock.value(0), 3)
+                # The market starts with an estimate
+                p = round(stock.value(0), 3)
+                self.prices[stock.name] = p
+                self.daily[stock.name] = []
                 self.history[stock.name] = []
+                self.history[stock.name].append([p, p, p, p])
         
-    def tick(self):
-        """
-        create another tick without a transaction
-        """
+    def open(self):
+        if self.is_open:
+            print("Already open.")
+            return
+        self.is_open = True
         self.t += 1
-        for ticker in self.prices:
-            self.history[ticker].append(self.prices[ticker])
-        
-        
+        for p in self.prices:
+            #self.history['open'][p] = market.prices[p] # yesterday's prices
+            self.daily = {ticker: [] for ticker in self.prices}
+            
+    def close(self):
+        if not self.is_open:
+            print ("Already closed.")
+            return
+        self.is_open = False
+        for ticker in self.daily:
+            if self.daily[ticker] == []:
+                # use the close of the last history entry
+                p = self.history[ticker][-1][1]
+                self.history[ticker].append([p, p, p, p])
+            else:
+                p_open = self.daily[ticker][0]
+                p_close = self.daily[ticker][-1]
+                p_high = np.max(self.daily[ticker])
+                p_low = np.min(self.daily[ticker])
+                self.history[ticker].append([p_open, p_close, p_high, p_low])
+        return self.daily.copy()
+
     def tx_price(self, ticker, tx):
         delta = self.spread if tx == 'bid' else -self.spread
         return round(self.prices[ticker] + delta, 3)
@@ -112,6 +138,10 @@ class Market:
     
     def execute (self, order, defer=True, reprocessing=False):
                     
+        if not self.is_open:
+            print ("Market is closed.")
+            return
+
         # bid-ask spread
         tx_price = self.tx_price(order.ticker, order.tx)
         
@@ -126,8 +156,7 @@ class Market:
             # Compute new price - only for original orders, not for deferred ones
             if not reprocessing:
                 self.prices[order.ticker] = tx_price
-                self.t += 1
-                self.history[order.ticker].append(tx_price)
+                self.daily[order.ticker].append(tx_price)
                 
             status = self.maybe_process_defered('ask' if order.tx == 'bid' else 'bid', order.ticker)
 
@@ -135,7 +164,6 @@ class Market:
         
         else:
             if defer:
-                self.tick()
                 #print("Defering order %s" % order.order_id)
                 self.orders[order.tx][order.ticker][order.order_id]=order
                 return OrderDefered(order)
@@ -173,10 +201,10 @@ class Market:
     
     
 class Investor:
-    def __init__(self, name, wealth):
+    def __init__(self, name, wealth, portfolio):
         self.wealth = wealth
         self.name = name
-        self.portfolio = {'AAPL': 200}
+        self.portfolio = portfolio
     
     def sell(self, symbol, n, p):
         self.wealth += n * p
@@ -189,5 +217,5 @@ class Investor:
         self.portfolio[symbol] = pos + n
        
     def __repr__(self):
-        return self.name + "(" + str(self.wealth) + ", " + str(self.portfolio['AAPL'])+ ")"
+        return self.name + "(" + str(self.wealth) + ", " + str(self.portfolio)+ ")"
                
