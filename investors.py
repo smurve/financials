@@ -22,7 +22,7 @@ class MomentumInvestor(Investor):
                 momentum = h[-1][0] - h[0][0]
                 value_diff = market.value_for('AAPL') - bid_price
                 incentive = value_diff * self.w_reason + momentum * self.w_momentum
-                incentive = np.random.normal(incentive, 1.3)
+                incentive = np.random.normal(incentive, 3.5)
                 self.history.append([value_diff, momentum, incentive])
                 #print("Value difference: %s" % value_diff )
                 #print("momentum:         %s" % momentum)
