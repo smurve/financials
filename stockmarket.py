@@ -7,8 +7,8 @@ class Stock:
     def __init__(self, name, trend_fun, noise):
         """
         name: Name of the stock
-        trend_fun: a 'true' value function mimicking fundamentals.
-        noise: noise to model the uncertainty of the 'true' value
+        trend_fun: an 'observed value" function mimicking fundamentals.
+        noise: noise to model the uncertainty of the 'observed value'.
         """
         self.name = name
         self.trend = trend_fun
@@ -16,7 +16,8 @@ class Stock:
         
     def value(self, t):
         """
-        true value plus noise
+        observed value plus noise
+        This value may be discontinuous to capture earning surprises
         """
         v = self.trend(t)
         return np.random.normal(v, self.noise)

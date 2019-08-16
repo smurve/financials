@@ -1,4 +1,4 @@
-tensorflow==2.0-alpha
+tensorflow==2.0-beta
 quandl
 pandas
 numpy
