@@ -13,28 +13,28 @@ class MomentumInvestor(Investor):
         super().__init__(name, wealth, portfolio)
         
     def act(self, market):
-            bid, ask = market.price_for('AAPL')
-            h = market.history_for('AAPL')
+        for ticker in market.prices:
+            self.act_on(market, ticker)
+        
+    def act_on(self, market, ticker):
+            bid, ask = market.price_for(ticker)
+            h = market.history_for(ticker)
             h = h[-self.trend_span:]
-            bid_price, ask_price = market.price_for('AAPL')
+            bid_price, ask_price = market.price_for(ticker)
             if len(h) > 0:
                 # comparing opening prices
+                N_TX = 10
                 momentum = h[-1][0] - h[0][0]
-                value_diff = market.value_for('AAPL') - bid_price
+                value_diff = market.value_for(ticker) - bid_price
                 incentive = value_diff * self.w_reason + momentum * self.w_momentum
                 incentive = np.random.normal(incentive, 3.5)
                 self.history.append([value_diff, momentum, incentive])
-                #print("Value difference: %s" % value_diff )
-                #print("momentum:         %s" % momentum)
-                #print("Incentive: %s" % incentive)
                 if incentive > 0:
-                    #print("Buying at %s" % bid_price)
-                    market.execute(Bid(self, 'AAPL', 10, bid_price))
+                    if ( self.cash > N_TX * bid_price + 1000.0):
+                        market.execute(Bid(self, ticker, N_TX, bid_price))
                 else:
-                    #print("Selling at %s" % ask_price)
-                    market.execute(Ask(self, 'AAPL', 10, ask_price))
-            else:
-                market.execute(Ask(self, 'AAPL', 10, ask_price))
+                    if self.portfolio[ticker] >= N_TX:
+                        market.execute(Ask(self, ticker, N_TX, ask_price))
 
                 
 class ValueInvestor(Investor):

@@ -5,7 +5,6 @@ class MovingStats:
     def __init__(self, maxlen, history=None):
         self.N = maxlen
         self.queue = deque(history or [], maxlen=maxlen)
-        self._calc()
 
     def _calc(self):
         self.std = np.std(self.queue)
@@ -13,9 +12,12 @@ class MovingStats:
         
     def push(self, value):
         self.queue.append(value)
-        self._calc()
 
     def stats(self):
-        return self.mean, self.std
+        if len(self.queue) > 2:
+            self._calc()
+            return self.mean, self.std
+        else:
+            return 0., 0.
     
     

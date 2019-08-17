@@ -202,21 +202,21 @@ class Market:
     
     
 class Investor:
-    def __init__(self, name, wealth, portfolio):
-        self.wealth = wealth
+    def __init__(self, name, cash, portfolio):
+        self.cash = cash
         self.name = name
         self.portfolio = portfolio
     
     def sell(self, symbol, n, p):
-        self.wealth += n * p
+        self.cash += n * p
         pos = self.portfolio[symbol]
         self.portfolio[symbol] = pos - n
         
     def buy(self, symbol, n, p):
-        self.wealth -= n * p
+        self.cash -= n * p
         pos = self.portfolio[symbol]
         self.portfolio[symbol] = pos + n
        
     def __repr__(self):
-        return self.name + "(" + str(self.wealth) + ", " + str(self.portfolio)+ ")"
+        return self.name + "(" + str(self.cash) + ", " + str(self.portfolio)+ ")"
                
