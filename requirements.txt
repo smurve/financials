@@ -1,4 +1,4 @@
-tensorflow==2.0-beta
+tensorflow-gpu==2.0.0-beta
 quandl
 pandas
 numpy
