@@ -33,7 +33,8 @@ class Order:
         self.price = price
         
     def __repr__(self):
-        return self.other_party.name + ":" + self.ticker + ":" + str(self.amount) + ":" + str(self.price)
+        return ( self.tx + ": " + str(self.amount) + " " + self.ticker 
+                + " for " + str(self.price))
 
 class Bid(Order):
     def __init__(self, other_party, ticker, amount, price):
@@ -208,15 +209,15 @@ class Investor:
         self.portfolio = portfolio
     
     def sell(self, symbol, n, p):
-        self.cash += n * p
+        self.cash = round(self.cash + n * p, 3)
         pos = self.portfolio[symbol]
         self.portfolio[symbol] = pos - n
         
     def buy(self, symbol, n, p):
-        self.cash -= n * p
+        self.cash = round(self.cash - n * p, 3)
         pos = self.portfolio[symbol]
         self.portfolio[symbol] = pos + n
        
     def __repr__(self):
-        return self.name + "(" + str(self.cash) + ", " + str(self.portfolio)+ ")"
+        return self.name + " (cash: " + str(self.cash) + ", " + str(self.portfolio)+ ")"
                
