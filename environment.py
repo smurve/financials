@@ -1,0 +1,91 @@
+import numpy as np
+from market_instance import new_market, make_investors
+from stockmarket import Ask, Bid, Investor
+
+class TradingEnvironment:
+    """
+    This class represents the RL environment of a single investor. It comprises of a
+    portfolio of holdings - which includes a cash position - and the market with its
+    players, in this case a bunch of momentum investors with limited reason...;-)
+    """
+    def __init__(self, config, holdings, market, tx_cost):
+        self.config = config
+        self.investor = self.create_investor(holdings)
+        self.market = market
+        self.other_investors = make_investors(config['num_investors'])
+        self.tx_cost = tx_cost
+        
+    def create_investor(self, holdings):
+        cash = holdings['cash']
+        del(holdings['cash'])
+        return Investor("WB", cash, holdings)        
+        
+    def let_others_trade(self):
+        for _ in range(self.config['num_rounds_per_day']):
+            for investor in self.other_investors:
+                investor.act(self.market)
+    
+    def total_wealth(self):
+
+        wealth = self.investor.cash
+        for ticker in self.investor.portfolio:
+            size = self.investor.portfolio[ticker]
+            wealth += size * self.market.price_for(ticker)[1]
+        return round(wealth,3)
+    
+    def normalized_holdings(self):
+        values = {}
+        values['cash'] = self.investor.cash
+        holdings = self.investor.portfolio
+        for ticker in holdings:
+            values[ticker] = holdings[ticker] * self.market.price_for(ticker)[1]
+        w = self.total_wealth()
+        return np.array([v/w for _,v in sorted(values.items())])
+    
+    def act(self, new_weights):
+        """
+        This constitutes a trading day. We act, and then the market moves on.
+        """
+        self.market.open()
+
+        orders = self.create_orders(new_weights)
+        for order in orders:
+            self.market.execute(order)
+
+            total_tx_volume = np.sum(
+                [order.amount * order.price for order in orders])
+        
+        fee = total_tx_volume * self.tx_cost
+        self.investor.cash = round(self.investor.cash - fee, 3)
+        
+        self.let_others_trade()
+        self.market.close()
+        
+        return self.state_rep()
+    
+    def state_rep(self):
+        return "To be implemented"
+    
+    def create_orders (self, new_weights):
+        """
+        Create an order book from the target portfolio weights
+        new_weights: list of normalized weights of the holdings
+        sorted by the holdings' ticker names, cash last
+        """
+        cur_weights = self.normalized_holdings()
+        vols = ((new_weights - cur_weights) * self.total_wealth())[:-1]
+        holdings = self.investor.portfolio
+        tickers = sorted(holdings)
+        prices = np.array([self.market.price_for(t) for t in tickers])
+
+        # identify the correct prices for bid and ask transactions
+        bid_asks = [p[(v<0).astype(int)] for v,p in zip(vols, prices)]
+
+        orders = []
+        for v, ba, t in zip(vols, bid_asks, tickers):
+            amt = np.abs((v/ba).astype(int))
+            B_or_A = Bid if v>0 else Ask
+            if v != 0:
+                orders.append(B_or_A(price=ba, amount=amt, 
+                                  ticker=t, other_party=self.investor))
+        return orders
