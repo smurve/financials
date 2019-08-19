@@ -10,7 +10,7 @@ class TradingEnvironment:
     """
     def __init__(self, config, holdings, market, tx_cost):
         self.config = config
-        self.investor = self.create_investor(holdings)
+        self.investor = self.create_investor(holdings.copy())
         self.market = market
         self.other_investors = make_investors(config['num_investors'])
         self.tx_cost = tx_cost
@@ -46,8 +46,10 @@ class TradingEnvironment:
         """
         This constitutes a trading day. We act, and then the market moves on.
         """
+        former_wealth = self.total_wealth()
+    
         self.market.open()
-
+        
         orders = self.create_orders(new_weights)
         for order in orders:
             self.market.execute(order)
@@ -61,10 +63,15 @@ class TradingEnvironment:
         self.let_others_trade()
         self.market.close()
         
-        return self.state_rep()
+        return self.state_rep(former_wealth)
     
-    def state_rep(self):
-        return "To be implemented"
+    def state_rep(self, former_wealth ):
+        h = self.market.history
+        returns = [ np.log(h[key][-1][1] / h[key][-2][1])
+                    for key in h]
+        returns = returns / np.sum(np.abs(returns))
+        observations = np.hstack([self.normalized_holdings(), returns])
+        return (observations, np.log(self.total_wealth()/former_wealth))
     
     def create_orders (self, new_weights):
         """
