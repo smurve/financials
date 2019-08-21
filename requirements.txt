@@ -1,4 +1,5 @@
-tensorflow-gpu==2.0.0-beta
+#tensorflow==2.0.0-beta
+#tensorflow-gpu==2.0.0-beta
 quandl
 pandas
 numpy
@@ -7,3 +8,4 @@ jupyterlab
 matplotlib
 statsmodels
 pandas_datareader
+bs4
