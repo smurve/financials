@@ -63,7 +63,7 @@ class ReplayBuffer(object):
     """Get batch of episodes to train on."""
     # random batch
     idxs = random.sample(xrange(self.cur_size), n)
-    return [self.buffer[idx] for idx in idxs], None
+    return [self.buffer[idx] for idx in idxs]
 
   def update_last_batch(self, delta):
     pass
