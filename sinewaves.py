@@ -85,6 +85,8 @@ class Environment():
         self.t = n_hist
         self.portfolio = np.array(portfolio)
         self.fee = fee
+        self.total_fees=0
+        self.initial_wealth = np.sum(portfolio)
   
     def SINX(self, x):
         x1=x+3*np.sin(x/5.5)
@@ -126,7 +128,7 @@ class Environment():
         return np.sum(self.portfolio)
     
     def normalized_holdings(self):
-        return (self.portfolio / self.wealth()).astype(np.float32)
+        return (self.portfolio / self.initial_wealth).astype(np.float32)
 
     def rebalance(self, newp):
         newp = np.array(newp) * self.wealth()
@@ -134,6 +136,7 @@ class Environment():
         self.portfolio = newp
         cost = tx * self.fee
         self.portfolio[0] -= cost
+        self.total_fees = round(self.total_fees + cost, 2)
         return self
     
     def tick(self):
