@@ -17,9 +17,6 @@ def new_actor(n_market, n_history, n_filters, n_portfolio, layers, activation='e
     # The dense policy head
     for i, u in enumerate(layers):
         out = tkl.Dense(units=u, activation=activation)(out)
-        # Batch-normalize second-but-last
-        #if i == len(layers) - 2:
-        #    out = tkl.BatchNormalization()(out)
     out = tkl.Dense(units=n_portfolio, activation='softmax')(out)
 
     model = tk.Model([inp_mh, inp_pw], out)
@@ -42,9 +39,6 @@ def new_critic(n_market, n_history, n_filters, n_portfolio, layers, activation='
 
     for i, u in enumerate(layers):
         out = tkl.Dense(units=u, activation=activation)(out)
-        # Batch-normalize second-but-last
-        #if i == len(layers) - 2:
-        #    out = tkl.BatchNormalization()(out)
     out = tkl.Dense(units=1, activation=None)(out)
 
     model = tk.Model(inputs=[inp_mh, inp_pw, inp_pa], outputs=out)

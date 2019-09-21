@@ -7,6 +7,7 @@ def SINX(x):
     x1=x+3*np.sin(x/5.5)
     return 10 + np.sin(x1/10) + np.sin(x1/33) + np.sin(x1/100)
 
+
 def COSX(x):
     x2=0.7*x+2*np.cos(x/5.5)
     return 12 + np.cos(x2/10) - np.cos(x2/23) + np.cos(x2/100)
