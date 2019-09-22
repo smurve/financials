@@ -12,7 +12,7 @@ class TradingEnvironment:
         self.config = config
         self.investor = self.create_investor(holdings.copy())
         self.market = market
-        self.other_investors = make_investors(config['num_investors'])
+        self.other_investors = make_investors(config['num_investors'], holdings)
         self.tx_cost = tx_cost
         
     def create_investor(self, holdings):

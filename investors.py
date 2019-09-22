@@ -24,10 +24,10 @@ class MomentumInvestor(Investor):
             if len(h) > 0:
                 # comparing opening prices
                 N_TX = 10
-                momentum = h[-1][0] - h[0][0]
-                value_diff = market.value_for(ticker) - bid_price
+                momentum = np.log(h[-1][0] / h[0][0])
+                value_diff = np.log(market.value_for(ticker) / bid_price)
                 incentive = value_diff * self.w_reason + momentum * self.w_momentum
-                incentive = np.random.normal(incentive, 3.5)
+                incentive = np.random.normal(incentive, .2)
                 self.history.append([value_diff, momentum, incentive])
                 if incentive > 0:
                     if ( self.cash > N_TX * bid_price + 1000.0):
