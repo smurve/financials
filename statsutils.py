@@ -21,3 +21,19 @@ class MovingStats:
             return 0., 0.
     
     
+# average along the axis using sections of a given length
+def avg_over_axis(orig, axis, section):
+    shape = np.shape(orig)
+    dim_a = shape[axis]
+    expanded = np.expand_dims(orig, axis+1)
+    new_shape = list(expanded.shape)
+    new_shape[axis] = dim_a//section
+    new_shape[axis+1] = section
+
+    reshaped = np.reshape(orig, new_shape)
+    rolled = np.rollaxis(reshaped, axis+1, 0)
+    avg = 0
+    for r in rolled:
+        avg += r / section
+    return avg
+    

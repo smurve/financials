@@ -2,9 +2,6 @@ import numpy as np
 from stockmarket import Market, Investor
 from investors import MomentumInvestor
 
-NUM_INVESTORS = 10
-NUM_ROUNDS_PER_DAY = 3
-
 sectors = {
     10: {"name": "Energy", "weight": .09, "cagr": .02, "sentiment": .1},
     15: {"name": "Materials", "weight": .09, "cagr": .02, "sentiment": .1},
@@ -174,10 +171,11 @@ def new_market():
     return Market(stocks=[aapl, msft, tsla], bid_ask=0.1)
 
 def make_investors(num_investors, portfolio=None):
+    from copy import deepcopy
     investors = []
     for i in range(num_investors):
         wr, wm, span = 0.3, 0.15, 20
-        portfolio =  portfolio or {'AAPL': 10000, 'TSLA': 10000, 'MSFT': 10000}
-        investor = MomentumInvestor("m-%s" % i, 1e5, portfolio, wr, wm, span)
+        portfolio = deepcopy(portfolio) or {'AAPL': 10000, 'TSLA': 10000, 'MSFT': 10000}
+        investor = MomentumInvestor("m-%s" % i, 1e8, portfolio, wr, wm, span)
         investors.append(investor)
     return investors
