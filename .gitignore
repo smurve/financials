@@ -1,4 +1,6 @@
-.ipynb_checkpoints 
+.idea
+.DS_Store
+.ipynb_checkpoints/
 __pycache__/
-venv/
-logs/
+transactions*
+DATA/
